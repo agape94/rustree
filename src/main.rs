@@ -46,7 +46,7 @@ fn main() {
                 Ok(cwd) => cwd,
                 Err(_) => PathBuf::new(),
             };
-            clone::clone_repository(repo, cwd);
+            let _repo = clone::clone_repository(repo, cwd).expect("Could not clone repository.");
         }
         Commands::Worktree {
             path,
