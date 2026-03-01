@@ -47,6 +47,48 @@ Explanation
 
 Each directory is an isolated working copy, backed by the same Git object database.
 
+## What Problems Does This Solve?
+1. No More Stashing
+Work on multiple branches simultaneously without:
+- `git stash`
+- Dirty working trees
+- Context switching headaches
+
+2. No Duplicate Clones
+Instead of:
+```
+project-main/
+project-feature/
+project-hotfix/
+```
+You get:
+```
+project/
+├── .bare/
+├── main/
+├── feature/
+└── hotfix/
+```
+One object database. Multiple working directories.
+
+3. Clean Feature Isolation
+Each branch:
+- Has its own folder
+- Has its own build artifacts
+- Has its own environment
+
+Perfect for:
+- Large builds
+- Docker projects
+- Python virtual environments
+- Monorepos
+
+4. Faster CI-like Local Testing
+You can:
+- Keep `main/` clean. You always have a working version of your code ready to go
+- Test features in isolation
+- Compare branches side by side
+
 ## Installation
 `cargo install --path .`
 
@@ -130,48 +172,6 @@ If no `--ssh-key` is provided:
 - The first successful key is used
 
 This makes working across multiple Git providers seamless.
-
-## What Problems Does This Solve?
-1. No More Stashing
-Work on multiple branches simultaneously without:
-- `git stash`
-- Dirty working trees
-- Context switching headaches
-
-2. No Duplicate Clones
-Instead of:
-```
-project-main/
-project-feature/
-project-hotfix/
-```
-You get:
-```
-project/
-├── .bare/
-├── main/
-├── feature/
-└── hotfix/
-```
-One object database. Multiple working directories.
-
-3. Clean Feature Isolation
-Each branch:
-- Has its own folder
-- Has its own build artifacts
-- Has its own environment
-
-Perfect for:
-- Large builds
-- Docker projects
-- Python virtual environments
-- Monorepos
-
-4. Faster CI-like Local Testing
-You can:
-- Keep `main/` clean. You always have a working version of your code ready to go
-- Test features in isolation
-- Compare branches side by side
 
 ## Typical Workflow
 ```
