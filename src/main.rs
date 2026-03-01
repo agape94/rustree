@@ -21,7 +21,12 @@ enum Commands {
     /// Clone something
     Clone {
         /// Repository URL (can be SSH or HTTPS link)
-        repo: String,
+        repository_url: String,
+
+        /// Path to the SSH key.
+        /// If not specified, all keys under '$HOME/.ssh' will be tried.
+        #[arg(short, long)]
+        ssh_key: Option<String>,
     },
 
     /// Manage worktrees
@@ -43,12 +48,25 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Clone { repo } => {
+        Commands::Clone {
+            repository_url: repo,
+            ssh_key,
+        } => {
             let cwd = match env::current_dir() {
                 Ok(cwd) => cwd,
                 Err(_) => PathBuf::new(),
             };
-            let _repo = clone::clone_repository(repo, cwd).expect("Could not clone repository.");
+
+            let ssh_key_path = if let Some(path) = ssh_key {
+                PathBuf::from(path)
+            } else {
+                env::home_dir().unwrap().join(".ssh")
+            };
+
+            assert!(ssh_key_path.exists());
+
+            let _repo = clone::clone_repository(repo, cwd, ssh_key_path)
+                .expect("Could not clone repository.");
         }
         Commands::Worktree {
             path,
