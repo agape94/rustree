@@ -1,9 +1,9 @@
-# wt-rust
+# rustree
 A helper tool for cloning bare repositories and managing clean, isolated Git worktrees with minimal friction.
 
-`wt-rust` streamlines a powerful Git workflow: one bare repository + multiple lightweight working directories, each tied to a branch.
+`rustree` streamlines a powerful Git workflow: one bare repository + multiple lightweight working directories, each tied to a branch.
 
-## Why wt-rust?
+## Why rustree?
 When working on multiple branches simultaneously (features, tickets, hotfixes), the typical workflow looks like:
 - Stash changes
 - Checkout another branch
@@ -14,7 +14,7 @@ Or you clone the same repository multiple times.
 Both approaches are messy.
 
 Git worktrees solve this problem — but managing them manually is tedious.
-`wt-rust` automates this by:
+`rustree` automates this by:
 - Cloning a repository as a bare repo
 - Creating a clean structure for multiple worktrees
 - Automatically handling SSH keys
@@ -98,10 +98,10 @@ Or build manually:
 
 ## Usage
 ```
-Usage: wt-rust <COMMAND>
+Usage: rustree <COMMAND>
 Helper tool that helps you cloning bare repositories and managing git worktrees for a bare repository
 
-Usage: wt-rust <COMMAND>
+Usage: rustree <COMMAND>
 
 Commands:
   clone     Clone a repository and create worktree for default branch
@@ -116,7 +116,7 @@ Options:
 Clone a repository as a bare repository and initialize the worktree structure.
 
 ```
-wt-rust clone [OPTIONS] <REPOSITORY_URL>
+rustree clone [OPTIONS] <REPOSITORY_URL>
 ```
 #### Arguments
 - `<REPOSITORY_URL>` — SSH or HTTPS repository URL
@@ -128,17 +128,17 @@ wt-rust clone [OPTIONS] <REPOSITORY_URL>
 ```
 #### Example
 
-`wt-rust clone git@github.com:user/project.git`
+`rustree clone git@github.com:user/project.git`
 
 Or with explicit key:
 
-`wt-rust clone -s ~/.ssh/id_ed25519 git@github.com:user/project.git`
+`rustree clone -s ~/.ssh/id_ed25519 git@github.com:user/project.git`
 
 ### Worktree Command
 Create and manage additional worktrees.
 
 ```
-wt-rust worktree [OPTIONS] <DIRECTORY> <BRANCH>
+rustree worktree [OPTIONS] <DIRECTORY> <BRANCH>
 ```
 #### Arguments
 - `<DIRECTORY>` — Path where the worktree should be created
@@ -161,10 +161,10 @@ If the branch does not exist:
 #### Examples
 - Create a new feature branch:
 
-    `wt-rust worktree TICKET-123 TICKET-123`
+    `rustree worktree TICKET-123 TICKET-123`
 - Create from specific base branch:
 
-    `wt-rust worktree feature-x feature-x --base-branch develop`
+    `rustree worktree feature-x feature-x --base-branch develop`
 
 ### SSH Key Handling
 If no `--ssh-key` is provided:
@@ -176,16 +176,16 @@ This makes working across multiple Git providers seamless.
 ## Typical Workflow
 ```
 # Clone once
-wt-rust clone git@github.com:user/project.git
+rustree clone git@github.com:user/project.git
 
 # Work on ticket
-wt-rust worktree TICKET-123 TICKET-123
+rustree worktree TICKET-123 TICKET-123
 
 cd TICKET-123
 # hack hack hack
 
 # Work on another ticket simultaneously
-wt-rust worktree TICKET-456 TICKET-456
+rustree worktree TICKET-456 TICKET-456
 ```
 No branch switching. No stashing. No chaos.
 
@@ -197,7 +197,7 @@ No branch switching. No stashing. No chaos.
 - Possibly renaming the tool
 
 ## When Should You Use This?
-You’ll love `wt-rust` if:
+You’ll love `rustree` if:
 - You work with multiple feature branches daily
 - You manage ticket-based workflows (Jira, Linear, etc.)
 - You dislike stashing
@@ -211,7 +211,7 @@ You’ll love `wt-rust` if:
 
 ## Contributing
 
-`wt-rust` is an open source project and contributions are welcome and appreciated!  
+`rustree` is an open source project and contributions are welcome and appreciated!  
 
 Whether you want to:
 
@@ -230,4 +230,4 @@ Whether you want to:
 5. Open a Pull Request  
 
 Please make sure your code follows the existing style and is well-tested.  
-All contributions are licensed under the same terms as `wt-rust`.
+All contributions are licensed under the same terms as `rustree`.
