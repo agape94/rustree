@@ -4,6 +4,8 @@ use clap::{Parser, Subcommand};
 use std::{env, path::PathBuf};
 
 mod clone;
+mod git;
+mod utils;
 mod worktree;
 
 #[derive(Parser)]
