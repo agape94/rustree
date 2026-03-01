@@ -1,9 +1,138 @@
 use crate::utils;
-use git2::FetchOptions;
+use git2::{Branch, Error, FetchOptions};
 use git2::{Cred, RemoteCallbacks, Repository};
 use ssh_key::PrivateKey;
 use std::fs;
 use std::path::PathBuf;
+
+pub fn branch_exists_locally(repo: &Repository, name: &String) -> bool {
+    repo.find_branch(name.as_str(), git2::BranchType::Local)
+        .is_ok()
+}
+
+pub fn branch_exists_remotely(repo: &Repository, name: &String) -> bool {
+    repo.find_branch(&format!("origin/{}", name), git2::BranchType::Remote)
+        .is_ok()
+}
+
+fn create_branch_locally<'a>(
+    repo: &'a Repository,
+    name: &'a String,
+    base_branch: &'a String,
+) -> Result<Branch<'a>, Error> {
+    let base_branch = repo
+        .find_branch(&format!("origin/{}", base_branch), git2::BranchType::Remote)
+        .unwrap();
+
+    repo.branch(&name, &base_branch.get().peel_to_commit().unwrap(), false)
+}
+
+fn push_branch_to_remote(
+    repo: &Repository,
+    branch: &Branch,
+    ssh_key: &PathBuf,
+) -> Result<(), Error> {
+    let mut remote = repo.find_remote("origin")?;
+
+    let callbacks = get_credential_callbacks(&ssh_key);
+
+    let mut push_options = git2::PushOptions::new();
+    push_options.remote_callbacks(callbacks);
+
+    let branch_name = branch.name().unwrap().unwrap().to_string();
+
+    // local_ref:remote_ref
+    let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
+
+    remote.push(&[refspec], Some(&mut push_options))
+}
+
+fn set_upstream_for_branch(branch: &mut Branch) -> Result<(), Error> {
+    let name = branch.name().unwrap().unwrap();
+    branch.set_upstream(Some(&format!("origin/{}", name)))
+}
+
+pub fn create_branch(
+    repo: &Repository,
+    name: &String,
+    base: Option<String>,
+    ssh_key: &PathBuf,
+) -> Result<(), Error> {
+    let _callbacks = get_credential_callbacks(&ssh_key);
+
+    let exists_locally = branch_exists_locally(&repo, &name);
+    let exists_remotely = branch_exists_remotely(&repo, &name);
+
+    if exists_locally && exists_remotely {
+        // Branch already exists, we should not create it again, but we will push it to remote and set upstream
+        println!("✅ Branch '{}' exists both locally and remotely", name);
+        return Ok(());
+    }
+
+    // Doesn't exist either locally or remotely, we create it
+    let base_branch = if let Some(b) = base {
+        b
+    } else {
+        get_default_branch(&repo).unwrap()
+    };
+
+    if !exists_locally && !exists_remotely {
+        // Create branch and push it to remote
+        let mut branch = create_branch_locally(&repo, &name, &base_branch).unwrap();
+        push_branch_to_remote(&repo, &branch, &ssh_key).unwrap();
+        set_upstream_for_branch(&mut branch).unwrap();
+        println!("✅ Created branch '{}' and pushed it to remote", name);
+        return Ok(());
+    } else if exists_locally && !exists_remotely {
+        let mut branch = repo.find_branch(&name, git2::BranchType::Local).unwrap();
+        push_branch_to_remote(&repo, &branch, &ssh_key).unwrap();
+        set_upstream_for_branch(&mut branch).unwrap();
+        println!("✅ Branch '{}' exists locally. Pushed it to remote", name);
+        return Ok(());
+    } else if !exists_locally && exists_remotely {
+        let _remote_branch = repo
+            .find_branch(&format!("origin/{}", name), git2::BranchType::Remote)
+            .unwrap();
+        let mut branch = create_branch_locally(&repo, &name, &base_branch).unwrap();
+        set_upstream_for_branch(&mut branch).unwrap();
+        println!(
+            "✅ Created branch '{}' and set upstream to the existing branch on remote ",
+            name
+        );
+        return Ok(());
+    }
+    return Err(Error::from_str(&format!(
+        "❌ Could not create the branch '{}'",
+        name
+    )));
+}
+
+pub fn open_repository(path: PathBuf) -> Result<git2::Repository, git2::Error> {
+    if path.exists() && path.is_dir() {
+        Repository::open(path)
+    } else {
+        Err(git2::Error::from_str(&format!(
+            "Could not open repository at path '{:?}'",
+            path
+        )))
+    }
+}
+
+pub fn get_default_branch(repo: &Repository) -> Result<String, git2::Error> {
+    let origin_head = repo.find_reference("refs/remotes/origin/HEAD").unwrap();
+
+    let target = origin_head
+        .symbolic_target()
+        .ok_or_else(|| git2::Error::from_str("origin/HEAD not symbolic"))
+        .unwrap();
+
+    Ok(target
+        .rsplit('/')
+        .next()
+        .ok_or_else(|| git2::Error::from_str("s"))
+        .unwrap()
+        .to_string())
+}
 
 pub fn get_ssh_keys(path: &PathBuf) -> Vec<PathBuf> {
     let mut ret: Vec<PathBuf> = Vec::new();
@@ -81,7 +210,6 @@ pub fn set_upstream_for_branches(repo: &mut Repository, ssh_key: &PathBuf) -> Re
             let remote_name = remote_branch.name().unwrap();
             match branch.set_upstream(remote_name) {
                 Ok(_) => {
-                    println!("✅ Upstream set successfully for branch {:?}", branch_name);
                     continue;
                 }
                 Err(e) => panic!(

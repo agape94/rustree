@@ -1,7 +1,7 @@
 // use git2::Repository;
 
 use clap::{Parser, Subcommand};
-use std::{env, path::PathBuf};
+use std::env;
 
 mod clone;
 mod git;
@@ -34,15 +34,19 @@ enum Commands {
     /// Manage worktrees
     Worktree {
         /// Path to worktree
-        path: String,
+        directory: String,
 
         /// Branch for the new worktree. Cannot be a branch already used by another worktree.
-        #[arg(long)]
         branch: String,
 
         /// Base branch for the new branch created for the worktree. If empty, the default branch of the repository will be used.
         #[arg(long)]
         base_branch: Option<String>,
+
+        /// Path to the SSH key.
+        /// If not specified, all keys under '$HOME/.ssh' will be tried.
+        #[arg(short, long)]
+        ssh_key: Option<String>,
     },
 }
 
@@ -54,33 +58,35 @@ fn main() {
             repository_url: repo,
             ssh_key,
         } => {
-            let cwd = match env::current_dir() {
-                Ok(cwd) => cwd,
-                Err(_) => PathBuf::new(),
-            };
-
-            let ssh_key_path = if let Some(path) = ssh_key {
-                PathBuf::from(path)
-            } else {
-                env::home_dir().unwrap().join(".ssh")
-            };
-
-            assert!(ssh_key_path.exists());
-
-            let _repo = clone::clone_repository(repo, cwd, ssh_key_path)
-                .expect("Could not clone repository.");
+            let cwd = env::current_dir().unwrap();
+            let ssh_key_path = utils::get_ssh_key_path(&ssh_key);
+            let _repo = clone::clone_repository(repo, cwd, ssh_key_path).unwrap();
         }
+
         Commands::Worktree {
-            path,
+            directory,
             branch,
             base_branch,
+            ssh_key,
         } => {
-            println!("Worktree path: {}", path);
-            println!("Branch name: {}", branch);
-            match base_branch {
-                Some(value) => println!("Using base branch: {}", value),
-                None => println!("No base branch provided"),
+            let repository_path = env::current_dir().unwrap();
+            let mut repo = git::open_repository(repository_path).unwrap();
+
+            let base_branch_str = if let Some(name) = base_branch {
+                name
+            } else {
+                git::get_default_branch(&repo).unwrap().to_string()
             };
+
+            let ssh_key_path = utils::get_ssh_key_path(&ssh_key);
+            let _worktree = worktree::create_worktree(
+                &mut repo,
+                directory,
+                branch,
+                base_branch_str,
+                &ssh_key_path,
+            )
+            .expect("Could not create worktree");
         }
     }
 }

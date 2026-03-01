@@ -1,6 +1,18 @@
+use std::env;
 use std::fs;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::PathBuf;
+
+pub fn get_ssh_key_path(path: &Option<String>) -> PathBuf {
+    let ssh_key_path = if let Some(p) = path {
+        PathBuf::from(p)
+    } else {
+        env::home_dir().unwrap().join(".ssh")
+    };
+
+    assert!(ssh_key_path.exists());
+    return ssh_key_path;
+}
 
 pub fn read_file(path: &PathBuf) -> Result<String, String> {
     if path.is_file() {

@@ -1,4 +1,4 @@
-use crate::git;
+use crate::{git, worktree};
 use git2::{Repository, build::RepoBuilder};
 use std::io::Write;
 use std::path::PathBuf;
@@ -39,7 +39,7 @@ pub fn clone_repository(
         repo_builder.fetch_options(fo);
     }
 
-    let mut _repo = repo_builder
+    let mut repo = repo_builder
         .clone(&repo_url, &repo_path.join(".bare"))
         .expect("❌ Could not clone repository");
 
@@ -51,12 +51,24 @@ pub fn clone_repository(
     file.write_all(b"gitdir: ./.bare\n")
         .expect("❌ Could not write to the .git file.");
 
-    git::set_upstream_for_branches(&mut _repo, &ssh_key).unwrap();
+    git::set_upstream_for_branches(&mut repo, &ssh_key).unwrap();
+    let base_branch = git::get_default_branch(&repo).unwrap();
+
+    std::env::set_current_dir(&repo_path).unwrap();
+
+    worktree::create_worktree(
+        &repo,
+        base_branch.clone(),
+        base_branch.clone(),
+        base_branch.clone(),
+        &ssh_key,
+    )
+    .unwrap();
 
     println!(
         "✅ Repository '{}' cloned successfully at '{}'",
         repo_url,
         repo_path.to_str().unwrap()
     );
-    Ok(_repo)
+    Ok(repo)
 }
