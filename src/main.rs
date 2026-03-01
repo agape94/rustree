@@ -8,7 +8,9 @@ mod worktree;
 
 #[derive(Parser)]
 #[command(name = "binary")]
-#[command(about = "Example CLI with subcommands")]
+#[command(
+    about = "Helper tool that helps you cloning bare repositories and managing git worktrees for a bare repository"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
