@@ -24,7 +24,7 @@ Result: clean separation between branches, no stashing, no duplicate clones.
 ## What Your Repository Will Look Like
 After cloning and creating worktrees, your project structure will look like this:
 ```
-root
+project
 ├── .bare
 │   └...
 ├── .git
