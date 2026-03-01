@@ -48,13 +48,13 @@ Explanation
 Each directory is an isolated working copy, backed by the same Git object database.
 
 ## What Problems Does This Solve?
-1. No More Stashing
+### 1. No More Stashing
 Work on multiple branches simultaneously without:
 - `git stash`
 - Dirty working trees
 - Context switching headaches
 
-2. No Duplicate Clones
+### 2. No Duplicate Clones
 Instead of:
 ```
 project-main/
@@ -71,7 +71,7 @@ project/
 ```
 One object database. Multiple working directories.
 
-3. Clean Feature Isolation
+### 3. Clean Feature Isolation
 Each branch:
 - Has its own folder
 - Has its own build artifacts
@@ -83,7 +83,7 @@ Perfect for:
 - Python virtual environments
 - Monorepos
 
-4. Faster CI-like Local Testing
+### 4. Faster CI-like Local Testing
 You can:
 - Keep `main/` clean. You always have a working version of your code ready to go
 - Test features in isolation
