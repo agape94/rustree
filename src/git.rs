@@ -309,8 +309,9 @@ pub fn print_worktrees_table(repo: &Repository) {
         fn priority(name: &str) -> u8 {
             match name {
                 "main" => 0,
-                "develop" => 1,
-                _ => 2,
+                "master" => 1,
+                "develop" => 2,
+                _ => 3,
             }
         }
 
