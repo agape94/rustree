@@ -1,7 +1,7 @@
 // use git2::Repository;
 
 use clap::{Parser, Subcommand};
-use git2::{Worktree, WorktreePruneOptions};
+use git2::WorktreePruneOptions;
 use std::{env, fs, path::PathBuf};
 
 mod clone;
