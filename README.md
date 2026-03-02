@@ -98,16 +98,20 @@ Or build manually:
 
 ## Usage
 ```
+Helper tool that helps you cloning bare repositories and managing git worktrees for a bare repository
+
 Usage: rustree <COMMAND>
 
 Commands:
-  clone     Clone something
-  worktree  Manage worktrees
-  list      List all git worktrees inside a repository
-  help      Print this message or the help of the given subcommand(s)
+  clone        Clone something
+  worktree     Manage worktrees
+  list         List all git worktrees inside a repository
+  rm-worktree  Remove a worktree
+  help         Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help  Print help
+
 
 ```
 ### 1. Clone Command
@@ -203,6 +207,22 @@ rustree list
  bugfix1        bugfixes/bugfix1                                                              /repository/bugfix1 
  TICKET-123     features/TICKET-123-add-custom-command-for-long-feature-branch-name           /repository/TICKET-123   
 ``` 
+
+### 4. Remove Worktree Command
+Remove a Git worktree managed by `rustree`.
+
+This command deletes the specified worktree from disk and cleans up its Git metadata in the repository.  
+`rustree rm-worktree <NAME> [REPO_PATH]`
+
+#### Arguments
+- `<NAME>` - Name of the worktree to remote
+- `[REPO_PATH]` - Path to the repository containing the worktree to remove. If not provided, the current directory will be used
+
+#### Examples
+- Remove worktree in the current repository
+    `rustree rm-worktree name`
+- Remove worktree in a repository
+    `rustree rm-worktree name /path/to/repo`
 
 ## Typical Workflow
 ```

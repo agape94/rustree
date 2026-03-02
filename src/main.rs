@@ -1,6 +1,7 @@
 // use git2::Repository;
 
 use clap::{Parser, Subcommand};
+use git2::{Worktree, WorktreePruneOptions};
 use std::{env, fs, path::PathBuf};
 
 mod clone;
@@ -54,6 +55,15 @@ enum Commands {
         /// Path to the repository. If not specified, the current working directory will be used. This path can be either relative or absolute.
         path: Option<String>,
     },
+
+    /// Remove a worktree
+    RmWorktree {
+        /// Name of the worktree to remove
+        name: String,
+
+        /// Path to the repository containing the worktree to remove. If not provided, the current directory will be used
+        repo_path: Option<String>,
+    },
 }
 
 fn main() {
@@ -103,6 +113,23 @@ fn main() {
 
             let repository = git::open_git_repository(&repo_path).unwrap();
             git::print_worktrees_table(&repository);
+        }
+
+        Commands::RmWorktree { repo_path, name } => {
+            let repo_path = match repo_path {
+                Some(repo_path) => fs::canonicalize(PathBuf::from(repo_path)).unwrap(),
+                None => env::current_dir().unwrap(),
+            };
+
+            let repository = git::open_git_repository(&repo_path).unwrap();
+
+            let worktree = repository.find_worktree(&name).unwrap();
+
+            std::fs::remove_dir_all(worktree.path()).unwrap();
+
+            worktree
+                .prune(Some(&mut WorktreePruneOptions::new()))
+                .unwrap();
         }
     }
 }
