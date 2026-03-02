@@ -204,13 +204,6 @@ rustree list
  TICKET-123     features/TICKET-123-add-custom-command-for-long-feature-branch-name           /repository/TICKET-123   
 ``` 
 
-### SSH Key Handling
-If no `--ssh-key` is provided:
-- All keys in `$HOME/.ssh` are tried automatically
-- The first successful key is used
-
-This makes working across multiple Git providers seamless.
-
 ## Typical Workflow
 ```
 # Clone once
@@ -226,26 +219,6 @@ cd TICKET-123
 rustree worktree TICKET-456 TICKET-456
 ```
 No branch switching. No stashing. No chaos.
-
-## Future Plans
-- Better remote detection
-- Smarter branch auto-tracking
-- Worktree listing & removal
-- Configurable layout
-- Possibly renaming the tool
-
-## When Should You Use This?
-You’ll love `rustree` if:
-- You work with multiple feature branches daily
-- You manage ticket-based workflows (Jira, Linear, etc.)
-- You dislike stashing
-- You want deterministic branch isolation
-- You work in large repositories
-
-## Philosophy
-- Keep Git powerful.
-- Remove friction.
-- Make worktrees effortless.
 
 ## Contributing
 
