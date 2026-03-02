@@ -165,7 +165,7 @@ If the branch does not exist:
 
     `rustree worktree feature-x feature-x --base-branch develop`
 
-### 3. List command
+### 3. List Worktrees Command
 List all Git worktrees inside a repository managed by `rustree`.
 
 This command scans the repository created by `rustree` and displays all existing worktrees in a formatted table for easy inspection.
