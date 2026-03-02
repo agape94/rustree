@@ -1,7 +1,7 @@
 // use git2::Repository;
 
 use clap::{Parser, Subcommand};
-use std::env;
+use std::{env, fs, path::PathBuf};
 
 mod clone;
 mod git;
@@ -48,6 +48,12 @@ enum Commands {
         #[arg(short, long)]
         ssh_key: Option<String>,
     },
+
+    /// List all git worktrees inside a repository
+    List {
+        /// Path to the repository. If not specified, the current working directory will be used. This path can be either relative or absolute.
+        path: Option<String>,
+    },
 }
 
 fn main() {
@@ -87,6 +93,16 @@ fn main() {
                 &ssh_key_path,
             )
             .expect("Could not create worktree");
+        }
+
+        Commands::List { path } => {
+            let repo_path = match path {
+                Some(repo_path) => fs::canonicalize(PathBuf::from(repo_path)).unwrap(),
+                None => env::current_dir().unwrap(),
+            };
+
+            let repository = git::open_git_repository(&repo_path).unwrap();
+            git::print_worktrees_table(&repository);
         }
     }
 }

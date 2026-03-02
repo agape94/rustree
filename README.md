@@ -99,19 +99,18 @@ Or build manually:
 ## Usage
 ```
 Usage: rustree <COMMAND>
-Helper tool that helps you cloning bare repositories and managing git worktrees for a bare repository
-
-Usage: rustree <COMMAND>
 
 Commands:
-  clone     Clone a repository and create worktree for default branch
+  clone     Clone something
   worktree  Manage worktrees
+  list      List all git worktrees inside a repository
   help      Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help  Print help
+
 ```
-### Clone Command
+### 1. Clone Command
 
 Clone a repository as a bare repository and initialize the worktree structure.
 
@@ -134,7 +133,7 @@ Or with explicit key:
 
 `rustree clone -s ~/.ssh/id_ed25519 git@github.com:user/project.git`
 
-### Worktree Command
+### 2. Worktree Command
 Create and manage additional worktrees.
 
 ```
@@ -165,6 +164,45 @@ If the branch does not exist:
 - Create from specific base branch:
 
     `rustree worktree feature-x feature-x --base-branch develop`
+
+### 3. List command
+List all Git worktrees inside a repository managed by `rustree`.
+
+This command scans the repository created by `rustree` and displays all existing worktrees in a formatted table for easy inspection.
+```
+rustree list [PATH]
+```
+#### Arguments
+- `[PATH]`  Path to the repository. If not specified, the current working directory will be used. This path can be either relative or absolute
+
+#### Examples
+- List worktrees in the current repository
+    `rustree list`
+- List worktrees in a repository
+    `rustree list /path/to/repo`
+
+#### Output
+The output is presented as a structured table with the following columns:
+- **Name** - The worktree directory name (relative to repository root folder)
+- **Branch name** - The full Git branch name checked out in the worktree
+- **Path** - Absolute system path to the worktree
+
+Notes:
+- Worktrees are sorted alphabetically
+- Primary branches such as `main` or `develop` are prioritized and shown first (if present)
+- Long branch names are wrapped to fit the console
+
+##### Example output
+```
+rustree list              
+ Name           Branch name                                                                   Path                                   
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ main           main                                                                          /repository/main         
+ develop        develop                                                                       /repository/develop      
+ test-branch    features/test-branch                                                          /repository/test-branch  
+ bugfix1        bugfixes/bugfix1                                                              /repository/bugfix1 
+ TICKET-123     features/TICKET-123-add-custom-command-for-long-feature-branch-name           /repository/TICKET-123   
+``` 
 
 ### SSH Key Handling
 If no `--ssh-key` is provided:
